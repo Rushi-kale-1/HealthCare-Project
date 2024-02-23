@@ -40,6 +40,19 @@ const DocterCredSchema = new mongoose.Schema({
     password:String
 })
 
+const DocterBlogSchema = new mongoose.Schema({
+    userId:{
+        ref:'DocterCred',
+        type:mongoose.Schema.Types.ObjectId
+    },
+    title:String,
+    data:String,
+    createdAt: {
+        type: Date,
+        default: Date.now
+    },
+})
+
 const DocterDocumentSchema = new mongoose.Schema({
     userId :{
         type: mongoose.Schema.Types.ObjectId,
@@ -62,6 +75,18 @@ const DocterDocumentSchema = new mongoose.Schema({
 
 })
 
+const DocterProfileSchema = new mongoose.Schema({
+    userId:{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:'DocterCred'
+    },
+    profile:{
+        filename: String,
+        contentType: String,
+        imageBase64: String
+    }
+})
+
 const DocterRatingSchema = new mongoose.Schema({
     userId:{
         type:mongoose.Schema.Types.ObjectId,
@@ -78,5 +103,7 @@ const UserDocument  = mongoose.model('UserDocument', UserDocumentSchema);
 const DocterCred  = mongoose.model('DocterCred', DocterCredSchema);
 const DocterDocument  = mongoose.model('DocterDocument', DocterDocumentSchema);
 const DocterRating = mongoose.model('DocterRating',DocterRatingSchema )
+const DocterBlog = mongoose.model('DocterBlog',DocterBlogSchema )
+const DocterProfile = mongoose.model('DocterProfile',DocterProfileSchema )
 
-module.exports = {UserCred, UserDocument, DocterCred, DocterDocument,DocterRating}
+module.exports = {UserCred, UserDocument, DocterCred, DocterDocument,DocterRating,DocterBlog,DocterProfile}

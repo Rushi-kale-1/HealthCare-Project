@@ -1,5 +1,5 @@
 const express = require('express');
-const { UserCred, UserDocument} = require("../database/db");
+const { UserCred, UserDocument, DocterCred, DocterDocument, DocterRating} = require("../database/db");
 const userRouter = express();
 const jwt = require('jsonwebtoken');
 const userMid = require("../middleware/userMid");
@@ -86,8 +86,6 @@ const userId =req.userId
             console.error('Error adding user info and image:', error);
             res.status(500).json({ msg: 'Internal server error' });
         });
-
-
 });
 
 userRouter.get('/reports', userMid, async (req,res)=>{
@@ -104,5 +102,40 @@ userRouter.get('/reports', userMid, async (req,res)=>{
 res.json({msg:"internal error"})
     }
 })
+
+
+userRouter.get('/doctors', userMid, async (req, res) => {
+    try {
+        const filter = req.query.filter || "";
+
+        const regexFilter = "your-filter-string";
+
+// Perform the search and populate the profile data
+        const doctors = await DocterCred.find({
+            $or: [
+                { firstname: { $regex: regexFilter, $options: 'i' } }, // Case-insensitive search for firstname
+                { lastname: { $regex: regexFilter, $options: 'i' } }   // Case-insensitive search for lastname
+            ]
+        }).populate({
+            path: 'userId', // Populate the userId field of DocterCred
+            select: 'profile', // Select the profile field of DocterProfile
+            populate: {
+                path: 'profile', // Populate the profile field of the referenced document
+                model: 'DocterProfile', // Specify the model of the referenced document
+                select: 'profile' // Select the profile field of DocterProfile
+            }
+        }).select('_id firstname lastname');
+
+// Return the result
+        res.json(doctors);
+
+        res.json({ doctors,profile });
+    } catch (error) {
+        console.error('Error fetching doctors:', error);
+        res.status(500).json({ msg: "Internal Server Error" });
+    }
+});
+
+
 
 module.exports = { userRouter };

@@ -1,8 +1,9 @@
 const express = require('express')
-const {UserCred, DocterCred, DocterDocument, UserDocument} = require("../database/db");
+const {UserCred, DocterCred, DocterDocument, UserDocument, DocterBlog, DocterProfile} = require("../database/db");
 const jwt = require("jsonwebtoken");
 const docterMid = require("../middleware/docterMid");
 const {docterupload} = require("../middleware/docterDocumentMulter");
+const {docterprofileupload} = require("../middleware/docterprofilemulter");
 const docterRouter = express()
 key = "AniketBhai007"
 function tokenMaker(data) {
@@ -113,6 +114,72 @@ docterRouter.get("/certificates", docterMid,async (req,res)=>{
     res.json({msg:"internal Error"})
     }
 })
+
+docterRouter.post('/blog',docterMid, async (req,res)=>{
+
+
+    try {
+        const blog = await DocterBlog.create({
+            userId: req.userId,
+            title: req.body.title,
+            data: req.body.data
+        })
+        if (!blog){
+            res.json({msg:"not successful"})
+        }
+        res.json({msg:"successful"})
+    }
+    catch {
+        res.json({msg:"Internal Server Error"})
+    }
+})
+docterRouter.get('/getblog', async (req,res)=>{
+    try{
+        const allblogs = await DocterBlog.find({})
+        if (!allblogs) {
+            res.json({msg: "No blogs to show"})
+        } else {
+            res.json({blogs: {allblogs}})
+        }
+    }
+    catch (err){
+        res.json({msg:"internal server error"})
+    }
+
+})
+
+docterRouter.post('/setdocterprofile',docterMid,docterprofileupload.single('file'),(req,res)=>{
+    const userId = req.userId
+    if (!req.file){
+        res.json({msg:"file not found"})
+    }
+    const { filename, mimetype, buffer } = req.file;
+
+    const imageBase64 = buffer.toString('base64');
+    DocterProfile.findOne({userId})
+        .then((data)=>{
+            if (data){res.json({msg:"profile pic already set"})
+            }
+        })
+        .catch(err=>{
+            res.json({msg:"internal error"})
+        })
+    DocterProfile.create(
+        {
+            userId,
+            profile: {filename, contentType: mimetype, imageBase64}
+        }
+    )
+        .then((docterDocument) => {
+            res.json({ msg: "Docter profile pic successfully" });
+        })
+        .catch((error) => {
+            console.error('Error adding docter image:', error);
+            res.status(500).json({ msg: 'Internal server error' });
+        });
+
+})
+
 
 
 module.exports = {docterRouter}
