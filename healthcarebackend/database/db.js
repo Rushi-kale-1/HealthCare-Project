@@ -1,6 +1,5 @@
 const mongoose = require('mongoose')
-
-mongoose.connect(, )
+mongoose.connect(process.env.MONGODB_URI )
     .then(() => {
         console.log('Connected to MongoDB');
     })
@@ -51,6 +50,11 @@ const DocterBlogSchema = new mongoose.Schema({
         type: Date,
         default: Date.now
     },
+    cover:{
+        filename:String,
+        contentType:String,
+        imageBase64:String
+    }
 })
 
 const DocterDocumentSchema = new mongoose.Schema({

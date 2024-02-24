@@ -4,6 +4,7 @@ const jwt = require("jsonwebtoken");
 const docterMid = require("../middleware/docterMid");
 const {docterupload} = require("../middleware/docterDocumentMulter");
 const {docterprofileupload} = require("../middleware/docterprofilemulter");
+const {blogCover} = require("../middleware/blogCoverMulter");
 const docterRouter = express()
 key = "AniketBhai007"
 function tokenMaker(data) {
@@ -115,14 +116,22 @@ docterRouter.get("/certificates", docterMid,async (req,res)=>{
     }
 })
 
-docterRouter.post('/blog',docterMid, async (req,res)=>{
+docterRouter.post('/blog',docterMid,blogCover.single('file'), async (req,res)=>{
 
 
     try {
+        if (!req.file){
+            res.json({msg:"file not found"})
+        }
+        const { filename, mimetype, buffer } = req.file;
+        const imageBase64 = buffer.toString('base64');
         const blog = await DocterBlog.create({
             userId: req.userId,
             title: req.body.title,
-            data: req.body.data
+            data: req.body.data,
+            cover:{
+                filename,contentType:mimetype,imageBase64
+            }
         })
         if (!blog){
             res.json({msg:"not successful"})

@@ -5,3 +5,8 @@ UserCred -> User firstname, lastname, username, password schema
 UserDocument -> user Document Schema
 
 token -> data is userName
+
+  <img
+      src={`data:image/jpeg;base64,${base64ImageData}`}
+      alt="Base64 Image"
+    />
